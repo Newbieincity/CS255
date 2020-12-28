@@ -156,39 +156,62 @@ void modeProject (){
 		}
 		cout << "Do you want to back to Project mode (Y/N)? ";
 		cin >> modeChoice;
+		system("CLS");
 	}while(modeChoice != 'N');	
 }
 void projectModify (Project duAn[]){
 	int modifyIndex;
 	int modifyChoice;
 	char modifyMenuChoice;
+	char modifyMenuChoiceAgain;
 	if (project_size == 0)
-		cout << "Data is NULL.\n";
-	return;
-		
-	cout << "Enter the number of the project that you want to modify: ";
-	cin >> modifyIndex;
-	do
 	{
-		cout << "------------------------------------------\n";
-		cout << "The current information of project " << modifyIndex << " is: \n";
-		cout << "1.Project number: " << duAn[modifyIndex-1].projectID << endl;
-		cout << "2.Project submission deadline: " << duAn[modifyIndex-1].deadline.d << duAn[modifyIndex-1].deadline.m << duAn[modifyIndex-1].deadline.y << endl; 
-		cout << "Which element you want to modify? ";
-		cin >> modifyChoice;
-		switch(modifyChoice)
+		cout << "Data is NULL.\n";
+		return;
+	}
+	cout << "List of the current project information: \n";
+	for(int j=0; j<project_size; j++)
+	{
+		cout << "At position " << (j+1) << " we have:\n";
+		cout << "Project number " << duAn[j].projectID << endl;
+		cout << "Deadline submission is: " << duAn[j].deadline.d << ":" << duAn[j].deadline.m << ":" << duAn[j].deadline.y << endl;
+		cout << endl;
+	}
+	cout << "Do you want to modify (Y/N)? ";
+	cin >> modifyMenuChoice ;
+	if (modifyMenuChoice == 'N')
+	 	return;
+	else if (modifyMenuChoice == 'Y')
+	{
+		cout << "Enter the position of the project that you want to modify: ";
+		cin >> modifyIndex;
+		do
 		{
-			case 1: cout << "Enter alter project number";
-					cin >> duAn[modifyIndex-1].projectID;
-					break;
-			case 2: cout << "Enter alter deadline submission DD/MM/YYYY: ";
-					cin >> duAn[modifyIndex-1].deadline.d >> duAn[modifyIndex-1].deadline.m >> duAn[modifyIndex-1].deadline.y;
-					break;
-			default: cout << "Invalid input of choice, please select the choice from 1 to 2.\n";
-		}
-		cout << "Do you want to modify again (Y/N)? ";
-		cin >> modifyMenuChoice;
-	}while(modifyMenuChoice != 'N');	
+			cout << "------------------------------------------\n";
+			cout << "The current information of project " << modifyIndex << " is: \n";
+			cout << "1.Project number: " << duAn[modifyIndex-1].projectID << endl;
+			cout << "2.Project submission deadline: " << duAn[modifyIndex-1].deadline.d <<  ":"  << duAn[modifyIndex-1].deadline.m << ":"  << duAn[modifyIndex-1].deadline.y << endl; 
+			cout << "Which element you want to modify? ";
+			cin >> modifyChoice;
+			switch(modifyChoice)
+			{
+				case 1: cout << "Enter alter project number: ";
+						cin >> duAn[modifyIndex-1].projectID;
+						break;
+				case 2: cout << "Enter alter deadline submission DD/MM/YYYY: ";
+						cin >> duAn[modifyIndex-1].deadline.d >> duAn[modifyIndex-1].deadline.m >> duAn[modifyIndex-1].deadline.y;
+						break;
+				default: cout << "Invalid input of choice, please select the choice from 1 to 2.\n";
+			}
+			cout << "------------------------------------------\n";
+			cout << "The current information of project " << modifyIndex << " is: \n";
+			cout << "1.Project number: " << duAn[modifyIndex-1].projectID << endl;
+			cout << "2.Project submission deadline: " << duAn[modifyIndex-1].deadline.d <<  ":"  << duAn[modifyIndex-1].deadline.m << ":"  << duAn[modifyIndex-1].deadline.y << endl; 
+			
+			cout << "Do you want to modify again (Y/N)? ";
+			cin >> modifyMenuChoiceAgain;
+		}while(modifyMenuChoiceAgain != 'N');
+	}		
 }
 void projectDeclare (Project duAn[] ){
 	do
@@ -203,7 +226,7 @@ void projectDeclare (Project duAn[] ){
 	}while((project_size < 0)||(project_size > 7));
 	
 	for (int i=0; i<project_size; i++){
-		cout << "Creating the project place at position " << (i+1) << " : \n";
+		cout << "Creating the project index " << (i+1) << " : \n";
 		cout << "Enter the project number: ";
 		cin >> duAn[i].projectID;
 		cout << "Enter the submission deadline DD/MM/YYYY: ";
