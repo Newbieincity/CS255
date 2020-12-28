@@ -1,0 +1,220 @@
+#include <iostream>
+#include <iomanip>
+#include <cstring>
+#include <fstream>
+#include<stdio.h> 
+#include<stdlib.h>
+using namespace std;
+
+//constructor
+const int max_group = 2; 
+const int max_member = 4;
+const int max_project = 7;
+int project_size = 0;
+struct Date{
+	int d,m,y;
+};
+struct Student {
+	int studentID;
+	string studentName;
+};
+struct Project{
+	int projectID;
+	Date deadline;
+//	enum projectStatus;
+};
+struct Group{
+	int groupID;
+	int groupSize;
+	Date submitDate;
+	Student member[max_member];
+};
+
+//prototype
+void groupInput ( Group team[], int size);
+
+void projectDeclare (Project duAn[] );
+void projectModify (Project duAn[]);
+int showMenu();
+void modeProject ();
+
+//main
+int main(){
+	//struct
+	Group nhom[max_group];	
+	
+	
+	
+	//param
+	int projectSize;
+	int choice;
+	char showChoice;
+	//menu
+	do
+	{
+		choice = showMenu();
+		switch(choice)
+		{
+			//input group Information
+			case 1: groupInput(nhom,max_group);	
+				break;
+			//declare project Information
+			case 2: modeProject();
+				break;
+			case 3: cout << "Coding..." << endl;
+				break;
+			case 4: cout << "Coding..." << endl;
+				break;
+			case 5: cout << "Coding..." << endl;
+				break;
+			case 6: cout << "Coding..." << endl;
+				break;
+			case 7: exit(1);
+				break;
+			default : cout << "Invalid input of choice, please select the choice from 1 to 7.\n";
+		}
+		cout << "Do you want to go back the menu (Y/N)? ";
+		cin >> showChoice;
+		system("CLS");
+	}while(showChoice != 'N');
+	
+	
+	// ahihi
+	 
+
+	 
+}
+
+//SubFunc
+int showMenu (){
+	int choice;
+	cout << "--------LACKOFWOMEN--------\n";
+	cout << "%%WELCOME TO OURS PROGRAM%%\n";
+	cout << "MENU\n";
+	cout << "1. Group information.\n";
+	cout << "2. Project Declaration.\n";
+	cout << "3. Submission.\n";
+	cout << "4. Statistic search.\n";
+	cout << "5. Overall statistic.\n";
+	cout << "6. Find uncompleted group.\n";
+	cout << "7. Exit.\n";
+	cout << "Enter your choice to use the service: ";
+	cin >> choice;
+	return choice;
+}
+void groupInput ( Group team[], int size)
+{
+	for (int i=0; i< max_group; i++)
+	{
+		cout << "Enter groupID: ";
+		cin >> team[i].groupID;
+		cout << "Enter group size: ";
+		cin >> team[i].groupSize;
+		cin.ignore();
+		for (int j=0; j < team[i].groupSize; j++)
+		{
+			cout << "Enter student name " << (j+1) << " : ";
+			getline(cin,team[i].member[j].studentName);
+			cout << "Enter student ID: " ;
+			cin >> team[i].member[j].studentID;
+			cin.ignore();
+		}
+	}
+	
+	cout << "-------------------------------------\n";
+	cout << "thong tin cua cac group: " << endl;
+	for (int i=0;i<max_group; i++){
+		cout << "GroupID is: " << team[i].groupID << endl;
+		cout << "So luong thanh vien: " << team[i].groupSize << endl;
+		cout << "Cac thanh vien " << "group " << (i+1) << " : " << endl;
+		for(int j=0;j < team[i].groupSize;j++)
+		{
+			cout << "Ho va ten sinh vien " << (j+1) << " : " << team[i].member[j].studentName << endl;
+			cout << "ID cua sinh vien la: " << team[i].member[j].studentID << endl;
+		}
+		cout << endl;
+	}
+	
+}
+void modeProject (){
+	Project pro[max_project];
+	int modePchoice;
+	char modeChoice;
+	do
+	{
+		cout << "---Project Mode---\n";
+		cout << "1. Declare mode.\n";
+		cout << "2. Modify mode.\n";
+		cout << "Enter your choice: ";
+		cin >> modePchoice;
+		switch(modePchoice){
+			case 1: projectDeclare(pro);
+				break;
+			case 2: projectModify(pro); 
+				break;
+			default : cout << "Invalid input of choice, please select the choice from 1 to 2.\n";
+		}
+		cout << "Do you want to back to Project mode (Y/N)? ";
+		cin >> modeChoice;
+	}while(modeChoice != 'N');	
+}
+void projectModify (Project duAn[]){
+	int modifyIndex;
+	int modifyChoice;
+	char modifyMenuChoice;
+	if (project_size == 0)
+		cout << "Data is NULL.\n";
+	return;
+		
+	cout << "Enter the number of the project that you want to modify: ";
+	cin >> modifyIndex;
+	do
+	{
+		cout << "------------------------------------------\n";
+		cout << "The current information of project " << modifyIndex << " is: \n";
+		cout << "1.Project number: " << duAn[modifyIndex-1].projectID << endl;
+		cout << "2.Project submission deadline: " << duAn[modifyIndex-1].deadline.d << duAn[modifyIndex-1].deadline.m << duAn[modifyIndex-1].deadline.y << endl; 
+		cout << "Which element you want to modify? ";
+		cin >> modifyChoice;
+		switch(modifyChoice)
+		{
+			case 1: cout << "Enter alter project number";
+					cin >> duAn[modifyIndex-1].projectID;
+					break;
+			case 2: cout << "Enter alter deadline submission DD/MM/YYYY: ";
+					cin >> duAn[modifyIndex-1].deadline.d >> duAn[modifyIndex-1].deadline.m >> duAn[modifyIndex-1].deadline.y;
+					break;
+			default: cout << "Invalid input of choice, please select the choice from 1 to 2.\n";
+		}
+		cout << "Do you want to modify again (Y/N)? ";
+		cin >> modifyMenuChoice;
+	}while(modifyMenuChoice != 'N');	
+}
+void projectDeclare (Project duAn[] ){
+	do
+	{
+		cout << "Enter the positive number of projects for all course: ";
+		cin >> project_size;
+		if((project_size < 0)||(project_size > 7)){
+		
+			cout << "Invalid input of number of projects for all course.\n ";
+			cout << "Please try input smaller than 7.\n";
+		}
+	}while((project_size < 0)||(project_size > 7));
+	
+	for (int i=0; i<project_size; i++){
+		cout << "Creating the project place at position " << (i+1) << " : \n";
+		cout << "Enter the project number: ";
+		cin >> duAn[i].projectID;
+		cout << "Enter the submission deadline DD/MM/YYYY: ";
+		cin >> duAn[i].deadline.d >> duAn[i].deadline.m >> duAn[i].deadline.y;
+	}
+	cout << "-------------------------------------------\n";
+	cout << "List of project information: \n";
+	for(int j=0; j<project_size; j++)
+	{
+		cout << "Project number " << duAn[j].projectID << endl;
+		cout << "Deadline submission is: " << duAn[j].deadline.d << ":" << duAn[j].deadline.m << ":" << duAn[j].deadline.y << endl;
+		cout << endl;
+	}	
+}
