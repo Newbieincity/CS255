@@ -11,6 +11,7 @@ const int max_group = 2;
 const int max_member = 4;
 const int max_project = 7;
 int project_size = 0;
+
 struct Date{
 	int d,m,y;
 };
@@ -21,15 +22,15 @@ struct Student {
 struct Project{
 	int projectID;
 	Date deadline;
-//	enum projectStatus;
+        Date submitDate;
+	int projectStatus=0;//ontime=2 ,late=1,pending=0
 };
 struct Group{
 	int groupID;
 	int groupSize;
-	Date submitDate;
 	Student member[max_member];
+        Project pnumber[max_project];
 };
-
 //prototype
 void groupInput ( Group team[], int size);
 
@@ -37,12 +38,16 @@ void projectDeclare (Project duAn[] );
 void projectModify (Project duAn[]);
 int showMenu();
 void modeProject ();
-
+int checkState(Project pnumber[], int projectNum, int d, int m, int y);
+void submitProject(Group nhom[],int num,Project pnumber[]);
+bool checkGroupID(Group nhom[],int size	,int id);
+string convertState(int state);
+bool checkProjectID(Group nhom[],int size,int id);
 //main
 int main(){
 	//struct
 	Group nhom[max_group];	
-	
+	Project pnumber[max_project];
 	
 	
 	//param
@@ -61,7 +66,8 @@ int main(){
 			//declare project Information
 			case 2: modeProject();
 				break;
-			case 3: cout << "Coding..." << endl;
+			case 3: submitProject(nhom,max_project,pnumber);
+			cout << endl;
 				break;
 			case 4: cout << "Coding..." << endl;
 				break;
@@ -241,3 +247,96 @@ void projectDeclare (Project duAn[] ){
 		cout << endl;
 	}	
 }
+void submitProject(Group nhom[],int num,Project pnumber[]){
+int gID,pID;
+do{
+cout << "Enter the group id :";
+cin >> gID;
+if (checkGroupID(nhom,max_group, gID))
+cout << "Wrong group id. Please enter again.\n";
+}while(checkGroupID(nhom,max_group,gID));
+int i,j;
+for(i=0;i<max_member;i++)
+if(gID==nhom[i].groupID){
+do{
+cout << "Enter the project id you want to submit";
+cin >> pID;
+if (checkProjectID(nhom,max_project,pID))
+cout << "Wrong project  id. Please enter again.\n";
+}while(checkProjectID(nhom,max_project,pID));
+for(j=0;j<num;j++){
+if(pID==nhom[i].pnumber[j].projectID)
+cout << "Enter the date submit (day month year, seperated by a space): ";
+  cin >> nhom[i].pnumber[j].submitDate.d >>nhom[i].pnumber[j].submitDate.m 
+     >> nhom[i].pnumber[j].submitDate.y;  
+  nhom[i].pnumber[j].projectStatus=checkState(pnumber, pID, nhom[i].pnumber[j].submitDate.d, nhom[i].pnumber[j].submitDate.m, nhom[i].pnumber[j].submitDate.y);
+}
+}
+}
+int checkState(Project pnumber[], int projectNum, int d, int m, int y)
+{
+  Date compare;
+  compare= pnumber[projectNum].deadline;
+  if (compare.y < y)
+  {
+     return 1;
+  }
+  else if (compare.y == y)
+  {
+     if (compare.m < m)
+     {
+        return 1;
+     }
+     else if (compare.m == m)
+     {
+        if (compare.d < d)
+        {
+           return 1;
+        }
+        else
+        {
+           return 2;
+        }
+     }
+     else
+     {
+        return 2;
+     }
+  }
+  else
+  {
+     return 2;
+  }
+}
+string convertState(int state)
+{
+  if (state == 2)
+  {
+     return "On Time";
+  }
+  else if (state == 1)
+  {
+     return "Late";
+  }
+  else
+  {
+     return "Pending";
+  }
+}
+bool checkGroupID(Group nhom[],int size	,int num){
+int i;
+for(i=0;i<size;i++){
+if(nhom[i].groupID==num)
+return false;
+}
+return true;}
+
+bool checkProjectID(Group nhom[],int size,int id){
+int i,j;
+for(i=0;i<max_group;i++){
+for(j=0;j<size;j++){
+if(id==nhom[i].pnumber[j].projectID)
+return false;
+}
+}
+return true;}
