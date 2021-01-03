@@ -4,7 +4,7 @@
 #include <fstream>
 #include<stdio.h> 
 #include<stdlib.h>
-#include<cctype>
+#include <ctime>
 using namespace std;
 
 //constructor
@@ -12,7 +12,6 @@ const int max_group = 2;
 const int max_member = 4;
 const int max_project = 7;
 int project_size = 0;
-int group_size = 0;
 
 struct Date{
 	int d,m,y;
@@ -33,7 +32,7 @@ struct Project{
 };
 struct Group{
 	int groupID;
-	int memberNum;
+	int groupSize;
 	Student member[max_member];
     Submission sub[max_project];
 };
@@ -41,9 +40,7 @@ struct Group{
 	//--input
 		//++group
 		void groupInput(Group team[]);
-		bool checkExistStudent(Group team[], int size, int IDcheck);
-		bool checkExistGroup(Group team[], int size, int IDcheck);
-		bool checkExistProject(Project pro[], int sizeP, int IDcheck);
+		bool checkExist(Group team[], int size, int student);
 		void displayAllGroup(Group team[], int size);
 		void displayOneGroup(Group team[], int i);
 		void saveAllGroup(Group team[], int size, fstream &file);	
@@ -64,13 +61,19 @@ struct Group{
 	bool checkProjectID(Project pnumber[],int id);
 	int findPositionbyGID(Group arr[], int GID);
 	int findPositionbyPID(Project arr[], int PID);
-
+    void getCurrentTime(Date &date);
+    void totalStatisticFile(Group nhom[],  fstream &inFile,Project pnumber[],int size);
+    int getProjectNum(Project pnumber[], Date inputDate);
+    void updateAllState(Group nhom[], Project pnumber[]);
+    void totalStatistic(Group nhom[],Project pnumber[],int size);
 //main
 int main(){
 	//struct
 	Group nhom[max_group];	
 	Project pnumber[max_project];
-	
+   fstream groupFile,overallFile;
+   Date currentDate;
+
 	
 	//param
 	int choice;
@@ -87,16 +90,57 @@ int main(){
 			//declare project Information
 			case 2: modeProject(pnumber);
 				break;
-			case 3: if((project_size == 0)||(group_size == 0))
-						{
-							cout << "Data is NULL. You need to declare at mode 1 & 2.\n";
-						}
-					else
-						modeSubmit(nhom,pnumber);
-					break;
+			case 3: modeSubmit(nhom,pnumber);
+			cout << endl;
+				break;
 			case 4: cout << "Coding..." << endl;
 				break;
-			case 5: cout << "Coding..." << endl;
+			case 5:	int overChoice;
+	char overallChoice;
+	int numProject;
+    Date currentDate;
+    updateAllState(nhom, pnumber);
+	do
+	{
+	cout << "---Overall Statistic---\n";
+	cout << "1. Input a specific date.\n";
+	cout << "2. Use the current date.\n";
+		cout << "Enter your choice: ";
+		cin >> overChoice;
+		switch(overChoice){
+			case 1: 
+			cout << "Input date to statistic (day month year, seperated by a space): ";
+              cin >> currentDate.d >> currentDate.m >> currentDate.y;
+               if (numProject == -1)
+           {
+              cout << "Please check the input date again!";
+		   }
+		    else
+           {
+              totalStatistic(nhom,pnumber, (numProject+1));
+              totalStatisticFile(nhom,overallFile,pnumber, (numProject+1));
+           }
+				break;
+			case 2: getCurrentTime(currentDate);
+			 numProject = getProjectNum(pnumber, currentDate);
+           if (numProject == -1)
+           {
+              cout << "Please check the input date again!";
+		   }
+		    else
+           {
+              totalStatistic(nhom,pnumber, (numProject+1));
+              totalStatisticFile(nhom,overallFile,pnumber, (numProject+1));
+           }
+
+				break;
+			default : cout << "Invalid input of choice, please select the choice from 1 to 2.\n";
+		}
+		cout << "Do you want to back to Project mode (Y/N)? ";
+		cin >> overallChoice;
+		system("CLS");
+	}while(overallChoice != 'N');
+
 				break;
 			case 6: cout << "Coding..." << endl;
 				break;
@@ -158,7 +202,7 @@ void modeGroup ( Group team[])
                        cin >> printChoice;
                        if (printChoice == 0)
                        {
-                           displayAllGroup(team, group_size);
+                           displayAllGroup(team, max_group);
                        }
                        else
                        {
@@ -166,7 +210,7 @@ void modeGroup ( Group team[])
                        }
                        break;
                    case 3:
-                       saveAllGroup(team, group_size, groupFile);
+                       saveAllGroup(team, max_group, groupFile);
                        cout << "Save group information to file successfully!\n";
                        break;
                 	default: cout << "Invalid input. Please enter number between 1 and 3.\n";
@@ -229,41 +273,23 @@ void modeSubmit(Group nhom[], Project pnumber[]){
 //group
 void groupInput(Group team[])
 {
-   int id,gID;
+   int id;
    int IDcheck;
-   cout << "How many group in your class? ";
-   cin >> group_size;
-   for (int i=0; i< group_size; i++)
+   for (int i=0; i< max_group; i++)
    {
-   		do
-   		{
-   			cout << "Enter groupID: ";
-       		cin >> gID;
-			if ((gID < 0)||(checkExistGroup(team,group_size,gID)))	
-				cout << "Invalid input or the group is exist. Please try again.\n";
-		}while((gID < 0)||(checkExistGroup(team,group_size,gID)));
-       	team[i].groupID = gID;
-       	do
-   		{
-   			cout << "Enter group size: ";
-       		cin >> team[i].memberNum;
-			if ((team[i].memberNum < 1)||(team[i].memberNum > 4))	
-				cout << "Invalid input. Please enter positive number from 1 to 4.\n";
-		}while((team[i].memberNum < 1)||(team[i].memberNum > 4));
-       	cin.ignore();
-       	for (int j=0; j < team[i].memberNum; j++)
-       	{
+       cout << "Enter groupID: ";
+       cin >> team[i].groupID;
+       cout << "Enter group size: ";
+       cin >> team[i].groupSize;
+       cin.ignore();
+       for (int j=0; j < team[i].groupSize; j++)
+       {
            cout << "Enter student name " << (j+1) << " : ";
            getline(cin,team[i].member[j].studentName);
-           do
-           {
-           		cout << "Enter student ID: " ;
-           		cin >> id;
-           		if(id < 0)
-           			cout << "Invalid input.Please enter positive ID.\n";
-		   }while(id<0);
+           cout << "Enter student ID: " ;
+           cin >> id;
            cin.ignore();
-           while (checkExistStudent(team, group_size, id))
+           while (checkExist(team, max_group, id))
            {
                cout << "The member have been exist! Enter again: \n";
                cout << "Enter student name " << (j+1) << " : ";
@@ -273,16 +299,16 @@ void groupInput(Group team[])
                cin.ignore();
            }
            team[i].member[j].studentID= id;
-       	}
+       }
    }
 
    cout << "-------------------------------------\n";
    cout << "Group information: " << endl;
-   for (int i=0;i<group_size; i++){
+   for (int i=0;i<max_group; i++){
        cout << "GroupID is: " << team[i].groupID << endl;
-       cout << "Group size is: " << team[i].memberNum << endl;
+       cout << "Group number: " << team[i].groupSize << endl;
        cout << "Group member " << (i+1) << " : " << endl;
-       for(int j=0;j < team[i].memberNum;j++)
+       for(int j=0;j < team[i].groupSize;j++)
        {
            cout << "Student name is: " << team[i].member[j].studentName << endl;
            cout << "Student ID: " << team[i].member[j].studentID << endl;
@@ -291,7 +317,7 @@ void groupInput(Group team[])
    }
 
 }
-bool checkExistStudent(Group team[], int size, int IDcheck)
+bool checkExist(Group team[], int size, int IDcheck)
 {
    for (int i = 0; i <= size; i++)
    {
@@ -305,24 +331,13 @@ bool checkExistStudent(Group team[], int size, int IDcheck)
    }
    return false;
 }
-bool checkExistGroup(Group team[], int size, int IDcheck)
-{
-   for (int i = 0; i <= size; i++)
-   {
-           if (team[i].groupID == IDcheck)
-           {
-               return true;
-           }
-   }
-   return false;
-}
 void displayAllGroup(Group team[], int size)
 {
    cout << setw(10) << left << "Group" << setw(10) << left << "Member" << setw(10) << left << "StudentID" << endl;
    for (int i = 0; i < size; i++)
    {
        cout << setw(10) << left << team[i].groupID;
-       for (int j = 0; j < team[i].memberNum; j++)
+       for (int j = 0; j < team[i].groupSize; j++)
        {
            if (j > 0)
            {
@@ -340,7 +355,7 @@ void displayOneGroup(Group team[], int i)
 {
    cout << setw(10) << left << "Group" << setw(10) << left << "Member" << endl;
    cout << setw(10) << left << team[i].groupID;
-   for (int j = 0; j < team[i].memberNum; j++)
+   for (int j = 0; j < team[i].groupSize; j++)
    {
        if (j > 0)
        {
@@ -364,7 +379,7 @@ void saveAllGroup(Group team[], int size, fstream &file)
        for (int i = 0; i < size; i++)
        {
            file << setw(10) << left << team[i].groupID;
-           for (int j = 0; j < team[i].memberNum; j++)
+           for (int j = 0; j < team[i].groupSize; j++)
            {
                if (j > 0)
                {
@@ -460,7 +475,6 @@ void projectModify (Project duAn[]){
 }
 void projectDeclare (Project duAn[] ){
 	char saveChoice;
-	int pID;
 	do
 	{
 		cout << "Enter the positive number of projects for all course: ";
@@ -468,20 +482,14 @@ void projectDeclare (Project duAn[] ){
 		if((project_size < 0)||(project_size > 7)){
 		
 			cout << "Invalid input of number of projects for all course.\n ";
-			cout << "Please input smaller than 7.\n";
+			cout << "Please try input smaller than 7.\n";
 		}
 	}while((project_size < 0)||(project_size > 7));
 	
 	for (int i=0; i<project_size; i++){
 		cout << "Creating the project index " << (i+1) << " : \n";
-		do
-		{
-			cout << "Enter the project number: ";
-			cin >> pID;
-			if((pID<0)||(checkExistProject(duAn,project_size,pID)))
-				cout << "Invalid input or the project is exist.\n";
-		}while((pID<0)||(checkExistProject(duAn,project_size,pID)));
-		duAn[i].projectID = pID;
+		cout << "Enter the project number: ";
+		cin >> duAn[i].projectID;
 		cout << "Enter the submission deadline DD/MM/YYYY: ";
 		cin >> duAn[i].deadline.d >> duAn[i].deadline.m >> duAn[i].deadline.y;
 	}
@@ -520,12 +528,12 @@ void submitProject(Group nhom[],int num, Project pnumber[]){
 		do{
 			cout << "Enter the group id: ";
 			cin >> gID;
-			if (checkGroupID(nhom,group_size, gID))
+			if (checkGroupID(nhom,max_group, gID))
 			cout << "Wrong group id. Please enter again.\n";
-		}while(checkGroupID(nhom,group_size,gID));
+		}while(checkGroupID(nhom,max_group,gID));
 		int i,j,pos;
 		//check groupId, projectId xong tra ve hai cai bien position
-		for(i=0; i< group_size; i++)
+		for(i=0; i< max_group; i++)
 		{
 			if(gID == nhom[i].groupID)
 			{
@@ -556,7 +564,7 @@ void submitProject(Group nhom[],int num, Project pnumber[]){
 }
 void checkSubmit ( Group nhom[]){
 	cout << "List of submissions:\n";
-	for (int i=0; i< group_size; i++){
+	for (int i=0; i< max_group; i++){
 		cout << "Group number: " << nhom[i].groupID << endl;
 		cout << "Submission list: \n";
 		for (int j=0; j< project_size; j++){			
@@ -601,17 +609,6 @@ int checkState(Project pnumber[], int projectNum, int d, int m, int y)
 }
 
 //Algo
-bool checkExistProject(Project pro[], int sizeP, int IDcheck)
-{
-   for (int i = 0; i <= sizeP; i++)
-   {
-           if (pro[i].projectID == IDcheck)
-           {
-               return true;
-           }
-   }
-   return false;
-}
 string convertState(int state)
 {
   if (state == 1)
@@ -660,7 +657,7 @@ int findPositionbyPID(Project arr[], int PID){
 }
 int findPositionbyGID(Group arr[], int GID){
 	int pos;
-	for(int i=0; i <group_size; i++)
+	for(int i=0; i <max_group; i++)
 	{
 		if(arr[i].groupID == GID){
 			pos = i;
@@ -668,3 +665,130 @@ int findPositionbyGID(Group arr[], int GID){
 	}
 	return pos;
 }
+
+void getCurrentTime(Date &date)
+{
+  time_t t = time(0);
+   tm* now = localtime(&t);
+   date.y = now->tm_year + 1900;
+   date.m = now->tm_mon + 1;
+   date.d = now->tm_mday;
+}
+
+void totalStatistic(Group nhom[],Project pnumber[],int size)
+{
+  string state, pr, temp;
+  cout << "The toal submission information:\n";
+ 
+  cout << left << setw(8) << "Group";
+  cout << left << setw(15) << "Student Name";
+  for (int i = 0; i < size; i++)
+  {
+     pr = "Project ";
+     cout << left << setw(10) << pr<<pnumber[i].projectID;
+  }
+  cout << endl;
+  for (int j = 0; j < max_group; j++)
+  {
+     cout << left << setw(8) << nhom[j].groupID;
+     cout << left << setw(15) << nhom[j].member[0].studentName;
+     for (int i = 0; i < size; i++)
+     {
+        state = convertState(nhom[j].sub[i].projectStatus);
+        cout << left << setw(15) << state;
+     }
+     cout << endl;
+     for (int k = 1; k < nhom[j].groupSize; k++)
+     {
+        cout << left << setw(8) << " ";
+        cout << left << setw(15) << nhom[j].member[k].studentName;
+        cout << endl;
+     }
+  }
+}
+
+void updateAllState(Group nhom[], Project pnumber[])
+{
+  int state;
+  Date currentDate;
+  getCurrentTime(currentDate);
+ 
+  for (int i = 0; i < max_group; i++)
+  {
+     for (int j = 0; j <project_size ; j++)
+     {
+        if (nhom[i].sub[j].projectStatus == 0)
+        {
+           state = checkState(pnumber, j, currentDate.d, currentDate.m, currentDate.y);
+           if (state == 2)
+           {
+              nhom[i].sub[j].projectStatus = 2;
+           }
+        }
+     }
+  }
+}
+int getProjectNum(Project pnumber[],Date inputDate)
+{
+  int index = 0, temp, i;
+  bool check = false;
+  for (i = 0; i < project_size; i++)
+  {
+     temp = checkState(pnumber, i, inputDate.d, inputDate.m, inputDate.y);
+     if (temp == 1)
+     {
+        check = true;
+        index = i - 1;
+        break;
+     }
+  }
+  if (check == false)
+  {
+     index = project_size - 1;
+  }
+  return index;
+}
+
+
+void totalStatisticFile(Group nhom[],  fstream &inFile,Project pnumber[],int size)
+{
+ 
+  inFile.open("OverallStatistic.txt", ios::out);
+  if (inFile.is_open())
+  {
+     string state, pr, temp;
+     inFile << "The toal submission information:\n";
+ 
+     inFile << left << setw(8) << "Group";
+     inFile << left << setw(15) << "Student Name";
+     for (int i = 0; i < size; i++)
+     {
+        pr = "Project ";
+        inFile << left << setw(10) << pr<<pnumber[i].projectID;
+     }
+     inFile << endl;
+     for (int j = 0; j < max_group; j++)
+     {
+        inFile << left << setw(8) << nhom[j].groupID;
+        inFile << left << setw(15) << nhom[j].member[0].studentName;
+        for (int i = 0; i < size; i++)
+        { 
+           state = convertState(nhom[j].sub[i].projectStatus);
+           inFile << left << setw(15) << state;
+        }
+        inFile << endl;
+        for (int k = 1; k < nhom[j].groupSize; k++)
+        {
+           inFile << left << setw(8) << " ";
+           inFile << left << setw(15) << nhom[j].member[k].studentName;
+           inFile << endl;
+        }
+     }
+  }
+  else
+  {
+     cout << "Can't open file to save, please check again!\n";
+  }
+}
+
+
